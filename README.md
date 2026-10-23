@@ -22,7 +22,7 @@
 
 脚本管理器菜单里也可以切换：放到侧栏、放回视频下方，或在两种位置之间来回切。
 
-行为参考 yakisova41 的 Move Youtube comments to sidebar，本脚本以 MIT 发布。
+交互参考 [yakisova41/move-youtube-comments-to-sidebar](https://github.com/yakisova41/move-youtube-comments-to-sidebar)（MIT，Copyright (c) 2023 yakisova41）。本仓库代码的许可见文末。
 
 ## X 界面美化（边栏自动隐藏 + 加宽 + 自定义中文字体）
 
@@ -50,3 +50,11 @@
 | 切换：字体应用到整个页面 | 关，只作用于推文正文 |
 
 中文字体示例：`PingFang SC`、`LXGW WenKai`、`Songti SC`、`Hiragino Sans GB`。拉丁字体示例：`Inter`、`SF Pro Text`、`Helvetica Neue`、`Georgia`。字体需要本机已经安装，脚本只负责指定名称。
+
+## 许可
+
+两份脚本都以 [MIT License](./LICENCE) 发布，版权所有 © 2026 Daniel。脚本头部的 `@license` 都是 MIT。
+
+## 分发
+
+安装和更新使用本页的 raw 链接，直接装仓库里的 `.user.js`。不需要打开 GitHub Releases，也不需要打开 Packages。

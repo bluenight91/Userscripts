@@ -10,6 +10,7 @@
 // @grant        GM_setValue
 // @grant        GM_addStyle
 // @grant        GM_registerMenuCommand
+// @license      MIT
 // @downloadURL  https://raw.githubusercontent.com/bluenight91/Userscripts/main/x-ui-beautify.user.js
 // @updateURL    https://raw.githubusercontent.com/bluenight91/Userscripts/main/x-ui-beautify.user.js
 // ==/UserScript==
