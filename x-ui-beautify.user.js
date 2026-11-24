@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         X 界面美化（边栏自动隐藏 + 加宽 + 自定义中文字体）
 // @namespace    grokbot.daniel
-// @version      1.5
+// @version      2.0
 // @description  左右边栏靠边隐藏、鼠标移到边上自动滑出；时间线加宽；推文字体/字号可自定义
 // @match        https://x.com/*
 // @match        https://twitter.com/*
@@ -29,66 +29,85 @@
     wholePage: GM_getValue('wholePage', false),
   };
 
+  const LEFT_SEL = 'div:has(> div > [data-rail-overflow])';
+  const RIGHT_SEL = 'div:has(> main) > aside';
+  const TWEET_TEXT_SEL = 'article div[dir="auto"].whitespace-pre-wrap';
+
   const side = (k, autoCss, sel) =>
     cfg[k] === 'hide' ? `${sel} { display: none !important; }`
-    : cfg[k] === 'show' ? autoCss + `${sel} { transform: none !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; box-shadow: none !important; border-${k === 'left' ? 'right' : 'left'}: 1px solid rgba(128,128,128,.2); }`
+    : cfg[k] === 'show' ? autoCss + `${sel} { transform: none !important; opacity: 1 !important; visibility: visible !important; pointer-events: auto !important; box-shadow: none !important; border-${k === 'left' ? 'right' : 'left'}: 1px solid var(--x-border-normal, rgba(128,128,128,.2)); }`
     : autoCss;
+
   const css = () => {
     const fam = `${cfg.latin ? `"${cfg.latin}", ` : ''}"${cfg.font}", -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif`;
     const textSel = cfg.wholePage
-      ? 'body, body *:not([data-testid="icon"]):not(svg):not(path)'
-      : '[data-testid="tweetText"], [data-testid="tweetText"] *';
+      ? 'body, body *:not(svg):not(svg *)'
+      : `${TWEET_TEXT_SEL}, ${TWEET_TEXT_SEL} *`;
+    const colWidth = `min(${cfg.width}px, 96vw)`;
     return `
 ${side('left', `      /* ---- 左边栏：固定在左侧，默认藏起 ---- */
-      header[role="banner"] {
+      ${LEFT_SEL} {
         position: fixed !important; top: 0; left: 0; bottom: 0;
-        z-index: 9999 !important; background: rgb(var(--gbx-bg, 255,255,255));
+        z-index: 9999 !important; background: var(--x-bg-primary, Canvas);
         box-shadow: 2px 0 16px rgba(0,0,0,.12);
-        transform: translateX(-100%); transition: transform .22s ease;
+        transform: translateX(-100%);
         overflow-y: auto; opacity: 0; visibility: hidden; pointer-events: none;
       }
-      html.gbx-left header[role="banner"] { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
-      header[role="banner"] > div { position: static !important; }
+      @media (prefers-reduced-motion: no-preference) {
+        ${LEFT_SEL} {
+          transition: transform .22s ease, opacity .22s ease, visibility .22s ease;
+          transition-behavior: allow-discrete;
+        }
+      }
+      html.gbx-left ${LEFT_SEL} { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
+      ${LEFT_SEL} > div { position: static !important; height: 100% !important; }
 
-`, 'header[role="banner"]')}
+`, LEFT_SEL)}
 ${side('right', `      /* ---- 右边栏：固定在右侧，默认藏起 ---- */
-      [data-testid="sidebarColumn"] {
+      ${RIGHT_SEL} {
+        display: flex !important;
         position: fixed !important; top: 0; right: 0; bottom: 0;
         width: 380px !important; z-index: 9999 !important;
-        background: rgb(var(--gbx-bg, 255,255,255)); padding: 0 12px;
+        background: var(--x-bg-primary, Canvas);
         box-shadow: -2px 0 16px rgba(0,0,0,.12);
-        transform: translateX(100%); transition: transform .22s ease;
+        transform: translateX(100%);
         overflow-y: auto; opacity: 0; visibility: hidden; pointer-events: none;
       }
-      html.gbx-right [data-testid="sidebarColumn"] { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
-      [data-testid="sidebarColumn"] > div > div { position: static !important; width: auto !important; }
-
-`, '[data-testid="sidebarColumn"]')}
-      /* ---- 中间时间线居中加宽 ---- */
-      main[role="main"] { align-items: center !important; }
-      main[role="main"] > div { width: 100% !important; max-width: none !important; justify-content: center !important; }
-      main[role="main"] > div > div { width: auto !important; max-width: none !important; justify-content: center !important; }
-      [data-testid="primaryColumn"] {
-        width: ${cfg.width}px !important; max-width: 96vw !important;
-        margin: 0 auto !important; flex: 0 0 auto !important;
+      @media (prefers-reduced-motion: no-preference) {
+        ${RIGHT_SEL} {
+          transition: transform .22s ease, opacity .22s ease, visibility .22s ease;
+          transition-behavior: allow-discrete;
+        }
       }
-      [data-testid="primaryColumn"] > div,
-      [data-testid="primaryColumn"] section,
-      [data-testid="primaryColumn"] section > div,
-      [data-testid="primaryColumn"] section > div > div,
-      [data-testid="cellInnerDiv"],
-      [data-testid="cellInnerDiv"] > div,
-      [data-testid="tweet"] { width: 100% !important; max-width: none !important; }
+      html.gbx-right ${RIGHT_SEL} { transform: translateX(0); opacity: 1; visibility: visible; pointer-events: auto; }
+      ${RIGHT_SEL} > div > div { position: static !important; width: auto !important; }
+
+`, RIGHT_SEL)}
+      /* ---- 中间时间线居中加宽 ---- */
+      body > div:has(main) {
+        max-width: none !important;
+        --x-main-column-width: ${colWidth} !important;
+        --x-timeline-max-width: ${colWidth} !important;
+      }
+      div:has(> main) {
+        grid-template-columns: minmax(0, 1fr) !important;
+        max-width: none !important;
+      }
+      main {
+        width: ${colWidth} !important; max-width: 96vw !important;
+        margin-inline: auto !important;
+      }
 
       /* ---- 字体 ---- */
       ${textSel} { font-family: ${fam} !important; }
-      [data-testid="tweetText"] {
+      ${TWEET_TEXT_SEL} {
         font-size: ${cfg.size}px !important; line-height: ${cfg.lineHeight} !important;
       }
 
       /* 边缘提示条 */
       .gbx-edge { position: fixed; top: 0; bottom: 0; width: 6px; z-index: 9998; }
-      .gbx-edge.l { left: 0; } .gbx-edge.r { right: 0; }
+      .gbx-edge.l { left: 0; ${cfg.left === 'auto' ? '' : 'display: none;'} }
+      .gbx-edge.r { right: 0; ${cfg.right === 'auto' ? '' : 'display: none;'} }
       .gbx-edge:hover { background: rgba(29,155,240,.25); }
     `;
   };
@@ -100,19 +119,13 @@ ${side('right', `      /* ---- 右边栏：固定在右侧，默认藏起 ---- *
   };
   apply();
 
-  // 跟随 X 的背景色（浅色/暗色）
-  const syncBg = () => {
-    const bg = getComputedStyle(document.body).backgroundColor.match(/\d+/g);
-    if (bg) document.documentElement.style.setProperty('--gbx-bg', bg.slice(0, 3).join(','));
-  };
-
   // 鼠标靠边显示，离开隐藏
   const EDGE = 8;
   const H = document.documentElement;
   document.addEventListener('mousemove', (e) => {
-    const x = e.clientX, w = window.innerWidth;
-    const left = document.querySelector('header[role="banner"]');
-    const right = document.querySelector('[data-testid="sidebarColumn"]');
+    const x = e.clientX, w = H.clientWidth;
+    const left = document.querySelector(LEFT_SEL);
+    const right = document.querySelector(RIGHT_SEL);
     const lw = left ? left.getBoundingClientRect().width : 0;
     const rw = right ? right.getBoundingClientRect().width : 0;
     if (cfg.left === 'auto' && x <= EDGE) H.classList.add('gbx-left');
@@ -121,40 +134,24 @@ ${side('right', `      /* ---- 右边栏：固定在右侧，默认藏起 ---- *
     else if (H.classList.contains('gbx-right') && x < w - rw - 20) H.classList.remove('gbx-right');
   }, { passive: true });
 
-  window.addEventListener('DOMContentLoaded', () => {
+  const addEdges = () => {
     ['l', 'r'].forEach((s) => {
+      if (document.querySelector('.gbx-edge.' + s)) return;
       const d = document.createElement('div');
       d.className = 'gbx-edge ' + s;
       document.body.appendChild(d);
     });
-    syncBg();
-    new MutationObserver(syncBg).observe(document.body, { attributes: true, attributeFilter: ['style'] });
-  });
-
-
-  // 推文正文加宽：从每条推文往上到 primaryColumn，解除所有宽度限制
-  const widen = () => {
-    const col = document.querySelector('[data-testid="primaryColumn"]');
-    if (!col) return;
-    col.querySelectorAll('article:not([data-gbx]), [data-testid="cellInnerDiv"]:not([data-gbx])').forEach((a) => {
-      a.dataset.gbx = '1';
-      let e = a;
-      while (e && e !== col) {
-        e.style.setProperty('max-width', 'none', 'important');
-        e.style.setProperty('width', '100%', 'important');
-        e.style.setProperty('margin-left', '0', 'important');
-        e.style.setProperty('margin-right', '0', 'important');
-        e = e.parentElement;
-      }
-    });
   };
-  new MutationObserver(widen).observe(document, { childList: true, subtree: true });
+  if (document.body) addEdges();
+  else window.addEventListener('DOMContentLoaded', addEdges, { once: true });
 
   // ---- Tampermonkey 菜单设置 ----
   const ask = (key, label, parse) => {
     const v = prompt(label, cfg[key]);
     if (v === null || v.trim() === '') return;
-    cfg[key] = parse ? parse(v) : v.trim();
+    const parsed = parse ? parse(v) : v.trim();
+    if (parse === Number && (!Number.isFinite(parsed) || parsed <= 0)) return;
+    cfg[key] = parsed;
     GM_setValue(key, cfg[key]);
     apply();
   };

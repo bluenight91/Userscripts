@@ -7,7 +7,7 @@
 | 脚本 | 版本 | 文件 |
 | --- | --- | --- |
 | YouTube 评论栏移到侧边栏 | 1.2.0 | [`youtube-comments-sidebar.user.js`](./youtube-comments-sidebar.user.js) |
-| X 界面美化（边栏自动隐藏 + 加宽 + 自定义中文字体） | 1.5 | [`x-ui-beautify.user.js`](./x-ui-beautify.user.js) |
+| X 界面美化（边栏自动隐藏 + 加宽 + 自定义中文字体） | 2.0 | [`x-ui-beautify.user.js`](./x-ui-beautify.user.js) |
 
 ## YouTube 评论栏移到侧边栏
 
